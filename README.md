@@ -70,6 +70,6 @@ Este sistema simula un entorno real de gestión municipal, aplicando:
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 
 Nicolas Leguizamon
