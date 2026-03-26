@@ -1,0 +1,229 @@
+{
+  "name": "Reclamos_Municipal",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const descripcion = $json.descripcion.toLowerCase();\n\nlet area_id = 1;\n\nif (descripcion.includes(\"poda\") || descripcion.includes(\"arbol\") || descripcion.includes(\"pasto\")) {\n  area_id = 1;\n} else if (descripcion.includes(\"basura\") || descripcion.includes(\"limpieza\")) {\n  area_id = 2;\n} else if (descripcion.includes(\"luz\") || descripcion.includes(\"luminaria\")) {\n  area_id = 3;\n} else if (descripcion.includes(\"pozo\") || descripcion.includes(\"bache\") || descripcion.includes(\"calle\") || descripcion.includes(\"lomo\")) {\n  area_id = 4;\n}\n\nreturn [{\n  ...$json,\n  area_id,\n  estado_id: 1\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -64
+      ],
+      "id": "f5543e75-e3cb-4af8-8cb5-12d8cb0d7fd6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reclamos (\n    nombre_ciudadano,\n    telefono,\n    descripcion,\n    tipo_reclamo,\n    direccion,\n    imagen_url,\n    area_id,\n    estado_id\n) VALUES (\n    '{{ $json.nombre }}',\n    '{{ $json.telefono }}',\n    '{{ $json.descripcion }}',\n    '{{ $json.tipo_reclamo }}',\n    '{{ $json.direccion }}',\n    '{{ $json.imagen_url }}',\n    {{ $json.area_id }},\n    {{ $json.estado_id }}\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        832,
+        -64
+      ],
+      "id": "e3a7a4af-2264-4e36-8b78-f56230a6838c",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "iKtBsybXb5owmeRs",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1eXooB6lchXG4V4HIqkOYFJ50GPm-IBBYnCbNveWK_B8/edit?resourcekey=&gid=1226331996#gid=1226331996",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1226331996,
+          "mode": "list",
+          "cachedResultName": "Respuestas de formulario 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eXooB6lchXG4V4HIqkOYFJ50GPm-IBBYnCbNveWK_B8/edit#gid=1226331996"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        64
+      ],
+      "id": "cf20af35-7d9b-47da-b9f4-4ff719f5a6b6",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "YoOrXeJOV94tR9rj",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d4794fdd-cfb3-45f7-a86c-ef3d6c6fc2be",
+              "name": "nombre",
+              "value": "={{ $json['Nombre Completo'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2ce97774-b17e-408d-9610-3a97b8a2de19",
+              "name": "telefono",
+              "value": "={{ $json['Teléfono'] }}",
+              "type": "number"
+            },
+            {
+              "id": "bebf85ff-db2a-4f34-8684-05485a0e41e6",
+              "name": "descripcion",
+              "value": "={{ $json['Descripción del reclamo'] }}",
+              "type": "string"
+            },
+            {
+              "id": "13ac2f74-03bc-42e6-84be-284ee10df675",
+              "name": "tipo_reclamo",
+              "value": "={{ $json['Tipo de reclamo'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f6fef645-2585-40e4-b37e-4e4e8c333872",
+              "name": "direccion",
+              "value": "={{ $json['Dirección'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a85f1d98-4fe7-48cd-af73-26982cab7105",
+              "name": "imagen_url",
+              "value": "={{ $json['Imagen del reclamo'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        64
+      ],
+      "id": "8b4cc4db-6900-4c83-98d6-8e309dbebe5e",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74cceba8-8cd0-49ca-b10b-d8462256a714",
+              "leftValue": "={{ $json.imagen_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        64
+      ],
+      "id": "d3fd9d8e-68de-496c-8f17-889745af8701",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "050b8016-478a-4e42-b22e-540e321819bc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a8cdf3d35f5f9fdddc799de10840f69b7b16a3540d0d97b6a09c4f7b3bc8089"
+  },
+  "id": "s4Vmd2zmJ0X-6ClG5Pjqz",
+  "tags": []
+}
